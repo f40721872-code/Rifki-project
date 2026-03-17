@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifki_Chat_room - Chat Publik</title>
+    
+    <meta property="og:title" content="Rifki_Chat_room">
+    <meta property="og:description" content="Chatroom publik untuk semua orang">
+    <meta property="og:url" content="https://rumahkurusdi.ddns.net">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #1a2634;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        /* tema terang (light) - default untuk join screen dan bisa di toggle */
+        body.light-theme {
+            background: #e9eef2;
+        }
+
+        body.light-theme .join-form {
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        body.light-theme .join-form h2 {
+            color: #2c3e50;
+        }
+
+        body.light-theme .chat-container {
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        body.light-theme .sidebar {
+            background: #f0f4f8;
+            color: #1e2a36;
+            border-right: 1px solid #d0dbe8;
+        }
+
+        body.light-theme .sidebar-header {
+            border-bottom: 1px solid #cfddee;
+        }
+
+        body.light-theme .domain-badge {
+            background: #e74c3c;
+            color: white;
+        }
+
+        body.light-theme .user-profile {
+            background: #e3eaf2;
+        }
+
+        body.light-theme .user-avatar {
+            background: #3498db;
+            color: white;
+        }
+
+        body.light-theme .user-name {
+            color: #1e2a36;
+        }
+
+        body.light-theme .online-users h4 {
+            color: #4b5c6b;
+        }
+
+        body.light-theme .users-list li {
+            background: #dee7f0;
+            color: #1e2a36;
+            border-left: 2px solid #2ecc71;
+        }
+
+        body.light-theme .chat-main {
+            background: #f8fafc;
+        }
+
+        body.light-theme .chat-header {
+            background: white;
+            border-bottom: 1px solid #dde5ed;
+        }
+
+        body.light-theme .room-info h2 {
+            color: #1e2a36;
+        }
+
+        body.light-theme .room-stats {
+            background: #eaf0f6;
+            color: #2c3e50;
+        }
+
+        body.light-theme .message-content {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        body.light-theme .own-message .message-content {
+            background: #3498db;
+            color: white;
+        }
+
+        body.light-theme .own-message .message-author {
+            color: rgba(255,255,255,0.9);
+        }
+
+        body.light-theme .own-message .message-time {
+            color: rgba(255,255,255,0.7);
+        }
+
+        body.light-theme .message-author {
+            color: #1e2a36;
+        }
+
+        body.light-theme .message-time {
+            color: #5f6c7a;
+        }
+
+        body.light-theme .system-message .message-content {
+            background: #dee8f2;
+            color: #2c3e50;
+        }
+
+        body.light-theme .message-input-area {
+            background: white;
+            border-top: 1px solid #dde5ed;
+        }
+
+        body.light-theme .input-wrapper {
+            background: #eef3f8;
+            border-color: #ccdae8;
+        }
+
+        body.light-theme .input-wrapper input {
+            color: #1e2a36;
+        }
+
+        body.light-theme .input-wrapper input::placeholder {
+            color: #8b9bb0;
+        }
+
+        /* tombol tema */
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            color: #f1c40f;
+            background: rgba(0,0,0,0.2);
+            margin-left: 8px;
+        }
+
+        body.light-theme .theme-toggle {
+            background: rgba(0,0,0,0.05);
+            color: #f39c12;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        body.light-theme .theme-toggle:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Join Screen */
+        #joinScreen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .join-form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .join-form h2 {
+            margin-bottom: 10px;
+            color: #2d3e4f;
+            font-size: 20px;
+        }
+
+        .join-form p {
+            font-size: 13px;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+
+        .join-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .join-form input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .join-form button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .join-form button:hover {
+            background: #2980b9;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            width: 90%;
+            max-width: 1100px;
+            height: 85vh;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 12px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h3 {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .domain-badge {
+            background: #e74c3c;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 9px;
+            margin-left: 4px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #34495e;
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .user-status {
+            font-size: 11px;
+            color: #2ecc71;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .user-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .online-users {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .online-users h4 {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .users-list {
+            list-style: none;
+        }
+
+        .users-list li {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            background: #34495e;
+            border-radius: 6px;
+            font-size: 12px;
+            border-left: 2px solid #2ecc71;
+        }
+
+        /* Main Chat */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        .room-info h2 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .room-info p {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+
+        .room-stats {
+            font-size: 12px;
+            color: #7f8c8d;
+            background: #f1f5f9;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            max-width: 75%;
+        }
+
+        .message.own-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            flex-shrink: 0;
+            border: 1px solid white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 14px 14px 14px 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .own-message .message-content {
+            background: #3498db;
+            color: white;
+            border-radius: 14px 14px 4px 14px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            font-size: 10px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .own-message .message-author {
+            color: rgba(255,255,255,0.9);
+        }
+
+        .message-time {
+            color: #95a5a6;
+            margin-left: 8px;
+        }
+
+        .own-message .message-time {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .message-text {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .system-message {
+            align-self: center;
+            max-width: 90%;
+        }
+
+        .system-message .message-content {
+            background: #e9eef3;
+            color: #4a5568;
+            font-size: 11px;
+            padding: 4px 15px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .message-input-area {
+            padding: 10px 15px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 8px;
+            background: #f1f5f9;
+            border-radius: 25px;
+            padding: 3px 3px 3px 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 12px;
+        }
+
+        .input-wrapper button {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper button:hover {
+            background: #2980b9;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="dark-theme"> <!-- default gelap -->
+    <!-- Join Screen -->
+    <div id="joinScreen">
+        <div class="join-form">
+            <h2>💬 Rifki_Chat_room</h2>
+            <p>Masukkan nama</p>
+            <input type="text" id="usernameInput" placeholder="Nama..." maxlength="30" autofocus>
+            <button onclick="joinChat()">Masuk</button>
+            <p style="margin-top: 12px; font-size: 10px; color: #aaa;">rumahkurusdi.ddns.net</p>
+            <div style="display: flex; justify-content: center; margin-top: 10px;">
+                <button id="themeToggleJoin" class="theme-toggle" onclick="toggleTheme()">🌙</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Room -->
+    <div class="chat-container" id="chatRoom" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>
+                    💬 Rifki
+                    <span class="domain-badge">PUBLIK</span>
+                </h3>
+                
+                <div class="user-profile">
+                    <div class="user-avatar" id="sidebarAvatar">R</div>
+                    <div class="user-info">
+                        <div class="user-name" id="sidebarName">-</div>
+                        <div class="user-status">Online</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="online-users">
+                <h4>ONLINE <span id="onlineCount">(0)</span></h4>
+                <ul class="users-list" id="usersList">
+                    <li>Memuat...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Chat -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="header-left">
+                    <div class="room-info">
+                        <h2># Rifki_Chat</h2>
+                        <p>Chat publik</p>
+                    </div>
+                    <button id="themeToggleChat" class="theme-toggle" onclick="toggleTheme()">🌙</button>
+                </div>
+                <div class="room-stats">
+                    <span>👥 <span id="headerOnlineCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer"></div>
+
+            <div class="message-input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Ketik pesan..." autocomplete="off">
+                    <button id="sendButton">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        let currentUser = '';
+        let users = [];
+        let messages = [];
+        let currentUserId = Date.now() + Math.random();
+
+        // cek tema tersimpan
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('rifkiTheme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                document.body.classList.remove('dark-theme');
+                updateThemeIcons('☀️');
+            } else {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                updateThemeIcons('🌙');
+            }
+        }
+
+        function updateThemeIcons(icon) {
+            const toggles = document.querySelectorAll('.theme-toggle');
+            toggles.forEach(btn => btn.textContent = icon);
+        }
+
+        window.toggleTheme = function() {
+            if (document.body.classList.contains('light-theme')) {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('rifkiTheme', 'dark');
+                updateThemeIcons('🌙');
+            } else {
+                document.body.classList.add('light-theme');
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('rifkiTheme', 'light');
+                updateThemeIcons('☀️');
+            }
+        };
+
+        // Join chat
+        window.joinChat = function() {
+            const username = document.getElementById('usernameInput').value.trim();
+            
+            if (!username) {
+                alert('Masukkan nama!');
+                return;
+            }
+
+            if (username.length < 2 || username.length > 30) {
+                alert('Nama 2-30 karakter');
+                return;
+            }
+
+            currentUser = username;
+            
+            document.getElementById('joinScreen').style.display = 'none';
+            document.getElementById('chatRoom').style.display = 'flex';
+            
+            document.getElementById('sidebarName').textContent = currentUser;
+            document.getElementById('sidebarAvatar').textContent = currentUser.charAt(0).toUpperCase();
+            
+            addUser(currentUser);
+            addSystemMessage(`👋 ${currentUser} bergabung`);
+            loadMessages();
+            
+            localStorage.setItem('lastUser', username);
+        };
+
+        // User functions
+        function addUser(username) {
+            if (!users.includes(username)) {
+                users.push(username);
+                updateUsersList();
+            }
+        }
+
+        function removeUser(username) {
+            users = users.filter(u => u !== username);
+            updateUsersList();
+        }
+
+        function updateUsersList() {
+            const usersList = document.getElementById('usersList');
+            const onlineCount = document.getElementById('onlineCount');
+            const headerOnlineCount = document.getElementById('headerOnlineCount');
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<li>Tidak ada user</li>';
+            } else {
+                usersList.innerHTML = users.map(user => 
+                    `<li>${user} ${user === currentUser ? '(kamu)' : ''}</li>`
+                ).join('');
+            }
+            
+            onlineCount.textContent = `(${users.length})`;
+            headerOnlineCount.textContent = users.length;
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (text && currentUser) {
+                const message = {
+                    id: Date.now(),
+                    author: currentUser,
+                    text: text,
+                    time: new Date().toISOString()
+                };
+                
+                messages.push(message);
+                displayMessage(message);
+                input.value = '';
+                saveMessages();
+            }
+        }
+
+        // Display message
+        function displayMessage(message) {
+            const container = document.getElementById('messagesContainer');
+            
+            const div = document.createElement('div');
+            div.className = `message ${message.author === currentUser ? 'own-message' : ''}`;
+            
+            const time = new Date(message.time);
+            const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
+            div.innerHTML = `
+                <div class="message-avatar">${message.author.charAt(0).toUpperCase()}</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">${escapeHtml(message.author)}</span>
+                        <span class="message-time">${timeStr}</span>
+                    </div>
+                    <div class="message-text">${escapeHtml(message.text)}</div>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // System message
+        function addSystemMessage(text) {
+            const message = {
+                id: Date.now(),
+                system: true,
+                text: text,
+                time: new Date().toISOString()
+            };
+            
+            messages.push(message);
+            
+            const container = document.getElementById('messagesContainer');
+            const time = new Date();
+            const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
+            const div = document.createElement('div');
+            div.className = 'message system-message';
+            div.innerHTML = `
+                <div class="message-content">
+                    <div class="message-text">${escapeHtml(text)}</div>
+                    <div class="message-time">${timeStr}</div>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            saveMessages();
+        }
+
+        // Load messages
+        function loadMessages() {
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+            
+            const saved = localStorage.getItem('rifkiChatMessages');
+            if (saved) {
+                try {
+                    messages = JSON.parse(saved).filter(m => {
+                        const msgTime = new Date(m.time).getTime();
+                        return (Date.now() - msgTime) < 24 * 60 * 60 * 1000;
+                    });
+                } catch (e) {
+                    messages = [];
+                }
+            }
+            
+            messages.forEach(msg => {
+                if (msg.system) {
+                    const time = new Date(msg.time);
+                    const timeStr = time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'message system-message';
+                    div.innerHTML = `
+                        <div class="message-content">
+                            <div class="message-text">${escapeHtml(msg.text)}</div>
+                            <div class="message-time">${timeStr}</div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                } else {
+                    displayMessage(msg);
+                }
+            });
+        }
+
+        // Save messages
+        function saveMessages() {
+            const recent = messages.slice(-100);
+            localStorage.setItem('rifkiChatMessages', JSON.stringify(recent));
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme(); // muat tema tersimpan
+
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
+            
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            const lastUser = localStorage.getItem('lastUser');
+            if (lastUser) {
+                document.getElementById('usernameInput').value = lastUser;
+            }
+        });
+
+        // User leave
+        window.addEventListener('beforeunload', function() {
+            if (currentUser) {
+                removeUser(currentUser);
+            }
+        });
+    </script>
+</body>
+</html>
